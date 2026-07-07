@@ -1,6 +1,6 @@
 # Open Mubert Web
 
-A desktop web player for Mubert channels, inspired by the Android tablet app UI. It signs in with existing Mubert app email/password credentials, shows the channel catalogue, and plays channels in the browser through a same-origin nginx relay.
+A desktop web player for [Mubert](https://apps.apple.com/us/app/mubert-ai-music-streaming/id1154429580) channels, inspired by the Android tablet app UI. It signs in with existing Mubert app email/password credentials, shows the channel catalogue, and plays channels in the browser through a same-origin nginx relay.
 
 ![Open Mubert Web screenshot](./screenshot.png)
 
