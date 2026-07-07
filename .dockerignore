@@ -1,0 +1,16 @@
+.git
+.github
+.cache
+tmp
+node_modules
+apktool_out
+jadx_out
+*.apk
+*.apks
+*.xapk
+*.log
+.env
+.env.*
+screenshot.png
+LOG.md
+README.md

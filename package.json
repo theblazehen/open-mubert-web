@@ -1,0 +1,13 @@
+{
+  "name": "open-mubert-web",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "start": "docker compose up relay",
+    "dev": "docker compose up relay",
+    "relay:up": "docker compose up -d relay",
+    "relay:down": "docker compose down",
+    "check": "docker compose config --quiet && node --check public/app.js"
+  }
+}

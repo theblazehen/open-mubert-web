@@ -1,0 +1,110 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Open Mubert Web</title>
+  <link rel="stylesheet" href="/styles.css" />
+</head>
+<body>
+  <main id="login-screen" class="login-screen">
+    <button id="email-back" class="icon-button login-back" type="button" aria-label="Back">‹</button>
+    <section id="email-step" class="login-step is-active" aria-label="Email sign in step">
+      <p class="login-intro"><strong>Open Mubert</strong><br />Sign in with your Mubert account. Email and password only — social login is not supported.</p>
+      <h1>Email</h1>
+      <p id="email-error" class="form-error"></p>
+      <label class="field-line">
+        <span class="sr-only">Email</span>
+        <input id="email" type="email" autocomplete="username" placeholder="you@example.com" required />
+      </label>
+      <button id="next-email" class="next-button" type="button">Next</button>
+    </section>
+
+    <section id="password-step" class="login-step" aria-label="Password sign in step">
+      <div class="top-row">
+        <button id="password-back" class="icon-button" type="button" aria-label="Back">‹</button>
+      </div>
+      <p class="login-intro"><strong>Open Mubert</strong><br />Sign in with your Mubert account. Email and password only — social login is not supported.</p>
+      <h1>Password</h1>
+      <p id="password-error" class="form-error"></p>
+      <label class="field-line">
+        <span class="sr-only">Password</span>
+        <input id="password" type="password" autocomplete="current-password" placeholder="Password" required />
+      </label>
+      <button id="sign-in" class="next-button" type="button">Next</button>
+    </section>
+  </main>
+
+  <main id="player-screen" class="player-screen" hidden>
+    <header class="app-header">
+      <div class="brand-block" aria-label="Open Mubert Web">
+        <p class="eyebrow">Open Mubert</p>
+        <h1>Web Player</h1>
+      </div>
+      <nav id="tabs" class="tabs" aria-label="Channel categories"></nav>
+      <div class="header-actions" aria-label="App actions">
+        <button id="logout-button" class="header-button danger" type="button">Logout</button>
+      </div>
+    </header>
+
+    <section class="tablet-layout">
+      <div class="library-tools">
+        <label class="search-box">
+          <span class="sr-only">Search channels</span>
+          <input id="search" type="search" placeholder="Search channels, artists, moods" />
+        </label>
+        <p id="library-count" class="library-count">Loading…</p>
+      </div>
+      <aside class="browser-pane">
+        <div class="fade fade-top"></div>
+        <div id="channel-list" class="channel-list" aria-label="Channels"></div>
+        <div class="fade fade-bottom"></div>
+      </aside>
+
+      <section class="play-layout" aria-label="Player">
+        <p id="premium" class="premium-label">Premium</p>
+        <div class="control-orbit">
+          <button id="category-art" class="category-art" type="button" aria-label="Current channel artwork"></button>
+        </div>
+        <div class="track-info">
+          <h2 id="track-title">Choose a channel</h2>
+          <p id="track-author">Channels load after sign in</p>
+          <p id="bg-author">Pick a channel from the library</p>
+        </div>
+        <div class="feedback-actions" aria-label="Playback feedback">
+          <button id="dislike-button" class="action-button feedback-button" type="button">− Less</button>
+          <button id="like-button" class="action-button feedback-button" type="button">+ More</button>
+        </div>
+        <div class="player-panel">
+          <div class="mode-note" id="mode-note"></div>
+          <label class="variant-picker">
+            <span>Variant</span>
+            <select id="variant-select"></select>
+          </label>
+          <audio id="player" controls crossorigin="anonymous"></audio>
+          <div class="channel-actions" aria-label="Channel controls">
+            <button id="favorite-toggle" class="action-button" type="button">☆ Save</button>
+            <button id="intensity-toggle" class="action-button" type="button">Intensity</button>
+            <button id="mix-button" class="action-button experimental" type="button">Mix</button>
+            <button id="loop-toggle" class="action-button" type="button">Loop off</button>
+          </div>
+          <p id="player-status" class="player-status" aria-live="polite"></p>
+        </div>
+      </section>
+    </section>
+  </main>
+
+  <template id="channel-template">
+    <button class="channel-row" type="button">
+      <span class="channel-icon"></span>
+      <span class="channel-copy">
+        <strong class="channel-name"></strong>
+        <small class="channel-meta"></small>
+      </span>
+      <span class="premium-star" aria-label="Premium">★</span>
+    </button>
+  </template>
+
+  <script src="/app.js" type="module"></script>
+</body>
+</html>
