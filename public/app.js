@@ -26,7 +26,7 @@ const dislikeButton = document.querySelector('#dislike-button');
 const likeButton = document.querySelector('#like-button');
 const intensityToggle = document.querySelector('#intensity-toggle');
 const mixButton = document.querySelector('#mix-button');
-const loopToggle = document.querySelector('#loop-toggle');
+const tuneToggle = document.querySelector('#tune-toggle');
 const logoutButton = document.querySelector('#logout-button');
 const variantPicker = document.querySelector('.variant-picker');
 const variantSelect = document.querySelector('#variant-select');
@@ -46,7 +46,7 @@ let activeChannelId = '';
 let activeStreamIndex = 0;
 let searchQuery = '';
 let lightModeOn = false;
-let loopOn = false;
+let tunedIn = false;
 let likeCount = 0;
 let dislikeCount = 0;
 const favoriteIds = new Set(JSON.parse(localStorage.getItem('mubert:favorites') || '[]'));
@@ -246,14 +246,14 @@ function renderControls() {
   dislikeButton.disabled = !hasChannel;
   likeButton.disabled = !hasChannel;
   mixButton.disabled = true;
-  loopToggle.disabled = !hasChannel;
+  tuneToggle.disabled = !hasChannel;
   intensityToggle.disabled = !hasChannel || channel.lightMode === 0;
   const hasVariants = hasChannel && channel.streams.length > 1;
   variantSelect.disabled = !hasVariants;
   variantPicker.hidden = !hasVariants;
   favoriteToggle.textContent = favoriteIds.has(channel?.unitId) ? '★ Saved' : '☆ Save';
   intensityToggle.textContent = lightModeOn ? 'Intensity: Light' : 'Intensity: Normal';
-  loopToggle.textContent = loopOn ? 'Loop on' : 'Loop off';
+  tuneToggle.textContent = tunedIn ? 'Tune out' : 'Tune in';
   mixButton.textContent = 'Mix unavailable';
 
   variantSelect.textContent = '';
@@ -286,14 +286,21 @@ function playChannel(channel, { autoplay = true, streamIndex = 0 } = {}) {
   bgAuthorEl.textContent = channel.premium ? 'Premium channel' : channel.pageName;
   categoryArt.style.backgroundImage = `url(${channel.image})`;
   playLayout.classList.toggle('is-premium', channel.premium);
-  player.loop = loopOn;
   player.src = stream.proxyUrl;
   setModeNote(channel.lightMode === 0
     ? 'This channel does not expose light/heavy intensity controls.'
     : 'Heavy mode active. Toggle light mode for a lighter generation.');
   renderChannelList();
   renderControls();
-  if (autoplay) player.play().catch(() => {});
+  if (autoplay) {
+    player.play().then(() => {
+      tunedIn = true;
+      renderControls();
+      setStatus(`Tuned in to ${channel.name}.`);
+    }).catch((error) => setStatus(`Could not tune in: ${error.message}`));
+  } else {
+    tunedIn = false;
+  }
 }
 
 async function loadChannels() {
@@ -395,19 +402,21 @@ async function mixStream() {
   }
 }
 
-async function toggleLoop() {
-  const next = !loopOn;
-  loopToggle.disabled = true;
-  try {
-    await mubertPost('v2/AppSetLoopState', 'AppSetLoopState', { loop_state: next ? 'on' : 'off', time: Math.floor(player.currentTime || 0) });
-    loopOn = next;
-    player.loop = loopOn;
-    setStatus(loopOn ? 'Loop enabled.' : 'Loop disabled.');
-  } catch (error) {
-    setStatus(`Loop failed: ${error.message}`);
-  } finally {
+function toggleTuning() {
+  const channel = activeChannel();
+  if (!channel) return;
+  if (tunedIn) {
+    player.pause();
+    tunedIn = false;
+    setStatus(`Tuned out of ${channel.name}.`);
     renderControls();
+    return;
   }
+  player.play().then(() => {
+    tunedIn = true;
+    setStatus(`Tuned in to ${channel.name}.`);
+    renderControls();
+  }).catch((error) => setStatus(`Could not tune in: ${error.message}`));
 }
 
 function clearCookies() {
@@ -433,6 +442,7 @@ async function logout() {
   activeChannelId = '';
   activeStreamIndex = 0;
   player.pause();
+  tunedIn = false;
   player.removeAttribute('src');
   player.load();
   showLogin();
@@ -469,7 +479,7 @@ dislikeButton.addEventListener('click', () => rate(false));
 likeButton.addEventListener('click', () => rate(true));
 intensityToggle.addEventListener('click', toggleIntensity);
 mixButton.addEventListener('click', mixStream);
-loopToggle.addEventListener('click', toggleLoop);
+tuneToggle.addEventListener('click', toggleTuning);
 logoutButton.addEventListener('click', logout);
 
 async function bootstrap() {

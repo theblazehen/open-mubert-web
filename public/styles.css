@@ -349,12 +349,23 @@ button { -webkit-tap-highlight-color: transparent; }
   background: #101012;
   color: #fff;
 }
-audio {
-  width: min(520px, 100%);
-  height: 34px;
-  opacity: .78;
-  filter: invert(1) hue-rotate(180deg);
+audio { display: none; }
+.tune-button {
+  min-width: 150px;
+  border: 1px solid rgba(255,255,255,.35);
+  border-radius: 999px;
+  padding: 12px 24px;
+  background: #fff;
+  color: #09090a;
+  font: inherit;
+  font-size: 12px;
+  font-weight: 900;
+  letter-spacing: .14em;
+  text-transform: uppercase;
+  cursor: pointer;
 }
+.tune-button:hover:not(:disabled) { background: rgba(255,255,255,.82); }
+.tune-button:disabled { opacity: .35; cursor: not-allowed; }
 
 @media (max-width: 980px) {
   .player-screen { overflow: auto; }
