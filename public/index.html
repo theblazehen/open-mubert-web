@@ -64,7 +64,10 @@
       <section class="play-layout" aria-label="Player">
         <p id="premium" class="premium-label">Premium</p>
         <div class="control-orbit">
-          <button id="category-art" class="category-art" type="button" aria-label="Current channel artwork"></button>
+          <button id="category-art" class="category-art" type="button" aria-label="Tune in to current station">
+            <span class="signal-bars" aria-hidden="true"><i></i><i></i><i></i><i></i></span>
+            <span class="art-action">Tune in</span>
+          </button>
         </div>
         <div class="track-info">
           <h2 id="track-title">Choose a channel</h2>
@@ -82,7 +85,10 @@
             <select id="variant-select"></select>
           </label>
           <audio id="player" crossorigin="anonymous"></audio>
-          <button id="tune-toggle" class="tune-button" type="button">Tune in</button>
+          <div class="tuner" aria-label="Radio tuner">
+            <span id="tuner-state" class="tuner-state"><i aria-hidden="true"></i> Off air</span>
+            <button id="tune-toggle" class="tune-button" type="button">Tune in</button>
+          </div>
           <div class="channel-actions" aria-label="Channel controls">
             <button id="favorite-toggle" class="action-button" type="button">☆ Save</button>
             <button id="intensity-toggle" class="action-button" type="button">Intensity</button>

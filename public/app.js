@@ -16,6 +16,7 @@ const titleEl = document.querySelector('#track-title');
 const authorEl = document.querySelector('#track-author');
 const bgAuthorEl = document.querySelector('#bg-author');
 const categoryArt = document.querySelector('#category-art');
+const artAction = document.querySelector('.art-action');
 const playLayout = document.querySelector('.play-layout');
 const searchEl = document.querySelector('#search');
 const libraryCountEl = document.querySelector('#library-count');
@@ -27,6 +28,7 @@ const likeButton = document.querySelector('#like-button');
 const intensityToggle = document.querySelector('#intensity-toggle');
 const mixButton = document.querySelector('#mix-button');
 const tuneToggle = document.querySelector('#tune-toggle');
+const tunerState = document.querySelector('#tuner-state');
 const logoutButton = document.querySelector('#logout-button');
 const variantPicker = document.querySelector('.variant-picker');
 const variantSelect = document.querySelector('#variant-select');
@@ -46,7 +48,6 @@ let activeChannelId = '';
 let activeStreamIndex = 0;
 let searchQuery = '';
 let lightModeOn = false;
-let tunedIn = false;
 let likeCount = 0;
 let dislikeCount = 0;
 const favoriteIds = new Set(JSON.parse(localStorage.getItem('mubert:favorites') || '[]'));
@@ -253,7 +254,13 @@ function renderControls() {
   variantPicker.hidden = !hasVariants;
   favoriteToggle.textContent = favoriteIds.has(channel?.unitId) ? '★ Saved' : '☆ Save';
   intensityToggle.textContent = lightModeOn ? 'Intensity: Light' : 'Intensity: Normal';
-  tuneToggle.textContent = tunedIn ? 'Tune out' : 'Tune in';
+  const tunedIn = !player.paused && !player.ended;
+  const connecting = player.dataset.tuning === 'true';
+  tuneToggle.textContent = tunedIn ? 'Tune out' : connecting ? 'Connecting…' : 'Tune in';
+  artAction.textContent = tunedIn ? 'Tune out' : connecting ? 'Connecting' : 'Tune in';
+  tunerState.lastChild.textContent = tunedIn ? ' On air' : connecting ? ' Connecting' : ' Off air';
+  playLayout.classList.toggle('is-tuned-in', tunedIn);
+  categoryArt.setAttribute('aria-label', `${tunedIn ? 'Tune out of' : 'Tune in to'} ${channel?.name || 'current station'}`);
   mixButton.textContent = 'Mix unavailable';
 
   variantSelect.textContent = '';
@@ -293,13 +300,16 @@ function playChannel(channel, { autoplay = true, streamIndex = 0 } = {}) {
   renderChannelList();
   renderControls();
   if (autoplay) {
+    player.dataset.tuning = 'true';
+    renderControls();
     player.play().then(() => {
-      tunedIn = true;
-      renderControls();
+      delete player.dataset.tuning;
       setStatus(`Tuned in to ${channel.name}.`);
-    }).catch((error) => setStatus(`Could not tune in: ${error.message}`));
-  } else {
-    tunedIn = false;
+    }).catch((error) => {
+      delete player.dataset.tuning;
+      renderControls();
+      setStatus(`Could not tune in: ${error.message}`);
+    });
   }
 }
 
@@ -405,18 +415,21 @@ async function mixStream() {
 function toggleTuning() {
   const channel = activeChannel();
   if (!channel) return;
-  if (tunedIn) {
+  if (!player.paused) {
     player.pause();
-    tunedIn = false;
     setStatus(`Tuned out of ${channel.name}.`);
-    renderControls();
     return;
   }
+  player.dataset.tuning = 'true';
+  renderControls();
   player.play().then(() => {
-    tunedIn = true;
+    delete player.dataset.tuning;
     setStatus(`Tuned in to ${channel.name}.`);
+  }).catch((error) => {
+    delete player.dataset.tuning;
     renderControls();
-  }).catch((error) => setStatus(`Could not tune in: ${error.message}`));
+    setStatus(`Could not tune in: ${error.message}`);
+  });
 }
 
 function clearCookies() {
@@ -442,7 +455,6 @@ async function logout() {
   activeChannelId = '';
   activeStreamIndex = 0;
   player.pause();
-  tunedIn = false;
   player.removeAttribute('src');
   player.load();
   showLogin();
@@ -480,6 +492,24 @@ likeButton.addEventListener('click', () => rate(true));
 intensityToggle.addEventListener('click', toggleIntensity);
 mixButton.addEventListener('click', mixStream);
 tuneToggle.addEventListener('click', toggleTuning);
+categoryArt.addEventListener('click', toggleTuning);
+player.addEventListener('play', renderControls);
+player.addEventListener('playing', () => {
+  delete player.dataset.tuning;
+  renderControls();
+});
+player.addEventListener('pause', renderControls);
+player.addEventListener('ended', renderControls);
+player.addEventListener('waiting', renderControls);
+player.addEventListener('stalled', () => {
+  renderControls();
+  setStatus('Signal interrupted. Reconnecting…');
+});
+player.addEventListener('error', () => {
+  delete player.dataset.tuning;
+  renderControls();
+  setStatus('This station is currently unavailable.');
+});
 logoutButton.addEventListener('click', logout);
 
 async function bootstrap() {
